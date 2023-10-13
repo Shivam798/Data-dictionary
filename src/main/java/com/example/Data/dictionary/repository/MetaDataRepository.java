@@ -1,12 +1,12 @@
 package com.example.Data.dictionary.repository;
 
-import com.example.Data.dictionary.model.MetaData;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.example.Data.dictionary.model.MetaDataModel;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MetaDataRepository extends
-        JpaRepository<MetaData,Integer> {
+        MongoRepository<MetaDataModel,String> {
 
-    MetaData findByPrimaryKey(String dataId);
+    MetaDataModel findByPrimaryKey(String dataId);
 }

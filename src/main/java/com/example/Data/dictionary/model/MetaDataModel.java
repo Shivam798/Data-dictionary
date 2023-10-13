@@ -1,12 +1,18 @@
 package com.example.Data.dictionary.model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.Map;
+
 
 @NoArgsConstructor
-@Entity
 @AllArgsConstructor
-@Data public class MetaData {
+@Document(collection = "dataDictionary")
+@Data public class MetaDataModel {
     @Id
     private String primaryKey;
     private String projectName;
@@ -20,4 +26,5 @@ import lombok.*;
     private String source;
     private String API;
     private String operation;
+    private String category;
 }
