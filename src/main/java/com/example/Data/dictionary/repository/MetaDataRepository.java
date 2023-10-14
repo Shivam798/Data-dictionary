@@ -9,4 +9,6 @@ public interface MetaDataRepository extends
         MongoRepository<MetaDataModel,String> {
 
     MetaDataModel findByPrimaryKey(String dataId);
+
+    boolean existsByPrimaryKey(String dataId);
 }

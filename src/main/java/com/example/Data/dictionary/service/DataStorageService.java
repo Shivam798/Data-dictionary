@@ -68,6 +68,10 @@ public class DataStorageService {
     }
 
     public ResponseEntity<Object> deleteEntity(String dataId) {
+        boolean exits=metaDataRepository.existsByPrimaryKey(dataId);
+        if(!exits){
+            return new ResponseEntity<>("Id does not exits",HttpStatus.NOT_ACCEPTABLE);
+        }
         MetaDataModel dataEntry=metaDataRepository.findByPrimaryKey(dataId);
         metaDataRepository.delete(dataEntry);
         return new ResponseEntity<>("Deleted Successfully",HttpStatus.ACCEPTED);

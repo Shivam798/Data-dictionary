@@ -3,7 +3,6 @@ package com.example.Data.dictionary.controller;
 import com.example.Data.dictionary.helper.ExcelHelper;
 import com.example.Data.dictionary.model.MetaDataModel;
 import com.example.Data.dictionary.service.DataStorageService;
-import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -14,13 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.print.Doc;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1")

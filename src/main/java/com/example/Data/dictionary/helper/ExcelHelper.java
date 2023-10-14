@@ -41,42 +41,51 @@ public class ExcelHelper {
 
     public Integer ConvertRowToJSONObjectAndSave(Row row) {
         MetaDataModel dataModel = new MetaDataModel();
-        if (ValueMatchesOptions(row.getCell(0).toString(), headerToHeaderOption.get(0))) {
-            dataModel.setProjectName(row.getCell(0).getStringCellValue());
-        } else return 0;
-        if (ValueMatchesOptions(row.getCell(1).toString(), headerToHeaderOption.get(1))) {
-            dataModel.setOrigination(row.getCell(1).getStringCellValue());
-        } else return 0;
-        if (ValueMatchesOptions(row.getCell(2).toString(), headerToHeaderOption.get(2))) {
-            dataModel.setScreenName(row.getCell(2).getStringCellValue());
-        } else return 0;
-        if (ValueMatchesOptions(row.getCell(3).toString(), headerToHeaderOption.get(3))) {
-            dataModel.setFieldLabel(row.getCell(3).getStringCellValue());
-        } else return 0;
-        if (ValueMatchesOptions(row.getCell(4).toString(), headerToHeaderOption.get(4))) {
-            dataModel.setVariableId(row.getCell(4).getStringCellValue());
-        } else return 0;
-        if (ValueMatchesOptions(row.getCell(5).toString(), headerToHeaderOption.get(5))) {
-            dataModel.setDataType(row.getCell(5).getStringCellValue());
-        } else return 0;
-        if (ValueMatchesOptions(row.getCell(6).toString(), headerToHeaderOption.get(6))) {
-            dataModel.setDataDescription(row.getCell(6).getStringCellValue());
-        } else return 0;
-        if (ValueMatchesOptions(row.getCell(7).toString(), headerToHeaderOption.get(7))) {
-            dataModel.setMandatory(row.getCell(7).getStringCellValue());
-        } else return 0;
-        if (ValueMatchesOptions(row.getCell(8).toString(), headerToHeaderOption.get(8))) {
-            dataModel.setSource(row.getCell(8).getStringCellValue());
-        } else return 0;
-        if (ValueMatchesOptions(row.getCell(9).toString(), headerToHeaderOption.get(9))) {
-            dataModel.setAPI(row.getCell(9).getStringCellValue());
-        } else return 0;
-        if (ValueMatchesOptions(row.getCell(10).toString(), headerToHeaderOption.get(10))) {
-            dataModel.setOperation(row.getCell(10).getStringCellValue());
-        } else return 0;
-        if (ValueMatchesOptions(row.getCell(11).toString(), headerToHeaderOption.get(11))) {
-            dataModel.setCategory(row.getCell(11).getStringCellValue());
-        } else return 0;
+       for (int i = 0; i < header.size(); i++) {
+            String cellValue = row.getCell(i).getStringCellValue();
+            if (ValueMatchesOptions(cellValue, headerToHeaderOption.get(i))) {
+                switch (i) {
+                    case 0:
+                        dataModel.setProjectName(cellValue);
+                        break;
+                    case 1:
+                        dataModel.setOrigination(cellValue);
+                        break;
+                    case 2:
+                        dataModel.setScreenName(cellValue);
+                        break;
+                    case 3:
+                        dataModel.setFieldLabel(cellValue);
+                        break;
+                    case 4:
+                        dataModel.setVariableId(cellValue);
+                        break;
+                    case 5:
+                        dataModel.setDataType(cellValue);
+                        break;
+                    case 6:
+                        dataModel.setDataDescription(cellValue);
+                        break;
+                    case 7:
+                        dataModel.setMandatory(cellValue);
+                        break;
+                    case 8:
+                        dataModel.setSource(cellValue);
+                        break;
+                    case 9:
+                        dataModel.setAPI(cellValue);
+                        break;
+                    case 10:
+                        dataModel.setOperation(cellValue);
+                        break;
+                    case 11:
+                        dataModel.setCategory(cellValue);
+                        break;
+                }
+            } else {
+                return 0;
+            }
+       }
         try {
             dataModel.setPrimaryKey(primaryKeyGenerator.generatePrimaryKey(
                     Arrays.asList(dataModel.getOrigination(), dataModel.getProjectName(), dataModel.getVariableId())));
@@ -109,23 +118,17 @@ public class ExcelHelper {
         for (int i = 0; i < header.size(); i++) {
             row.createCell(i).setCellValue(header.get(i));
         }
-
         for (MetaDataModel data : dataList) {
-            System.out.println(data);
+            int columnIdx = 0;
             row = sheet.createRow(rowIdx++);
+            String[] attributes = {data.getProjectName(), data.getOrigination(), data.getScreenName(),
+                    data.getFieldLabel(), data.getVariableId(), data.getDataType(),
+                    data.getDataDescription(), data.getMandatory(), data.getSource(),
+                    data.getAPI(), data.getOperation(), data.getCategory()};
 
-            row.createCell(0).setCellValue(data.getProjectName());
-            row.createCell(1).setCellValue(data.getOrigination());
-            row.createCell(2).setCellValue(data.getScreenName());
-            row.createCell(3).setCellValue(data.getFieldLabel());
-            row.createCell(4).setCellValue(data.getVariableId());
-            row.createCell(5).setCellValue(data.getDataType());
-            row.createCell(6).setCellValue(data.getDataDescription());
-            row.createCell(7).setCellValue(data.getMandatory());
-            row.createCell(8).setCellValue(data.getSource());
-            row.createCell(9).setCellValue(data.getAPI());
-            row.createCell(10).setCellValue(data.getOperation());
-            row.createCell(11).setCellValue(data.getCategory());
+            for (String attribute : attributes) {
+                row.createCell(columnIdx++).setCellValue(attribute);
+            }
         }
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
