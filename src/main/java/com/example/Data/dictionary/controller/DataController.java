@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:5174")
 @RestController
 @RequestMapping("api/v1")
 public class DataController {
