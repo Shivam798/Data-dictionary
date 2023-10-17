@@ -5,6 +5,7 @@ import com.example.Data.dictionary.constants.Header;
 import com.example.Data.dictionary.model.MetaDataModel;
 import com.example.Data.dictionary.repository.MetaDataRepository;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -16,8 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class ExcelHelper {
@@ -39,10 +39,14 @@ public class ExcelHelper {
         return true;
     }
 
-    public Integer ConvertRowToJSONObjectAndSave(Row row) {
+    public List<String> ConvertRowToJSONObjectAndSave(Row row) {
         MetaDataModel dataModel = new MetaDataModel();
        for (int i = 0; i < header.size(); i++) {
-            String cellValue = row.getCell(i).getStringCellValue();
+           String cellValue = "";
+           Cell cell = row.getCell(i);
+           if (cell != null) {
+               cellValue = cell.getStringCellValue();
+           }
             if (ValueMatchesOptions(cellValue, headerToHeaderOption.get(i))) {
                 switch (i) {
                     case 0:
@@ -67,30 +71,60 @@ public class ExcelHelper {
                         dataModel.setDataDescription(cellValue);
                         break;
                     case 7:
-                        dataModel.setMandatory(cellValue);
+                        dataModel.setCategory(cellValue);
                         break;
                     case 8:
-                        dataModel.setSource(cellValue);
+                        dataModel.setMandatory(cellValue);
                         break;
                     case 9:
-                        dataModel.setAPI(cellValue);
+                        dataModel.setSource(cellValue);
                         break;
                     case 10:
-                        dataModel.setOperation(cellValue);
+                        dataModel.setAPI(cellValue);
                         break;
                     case 11:
-                        dataModel.setCategory(cellValue);
+                        dataModel.setCredit(cellValue);
+                        break;
+                    case 12:
+                        dataModel.setOperation(cellValue);
+                        break;
+                    case 13:
+                        dataModel.setFI(cellValue);
+                        break;
+                    case 14:
+                        dataModel.setPD(cellValue);
+                        break;
+                    case 15:
+                        dataModel.setLegal(cellValue);
+                        break;
+                    case 16:
+                        dataModel.setTechnical(cellValue);
+                        break;
+                    case 17:
+                        dataModel.setRCU(cellValue);
+                        break;
+                    case 18:
+                        dataModel.setSetStage(cellValue);
+                        break;
+                    case 19:
+                        dataModel.setUseStage(cellValue);
                         break;
                 }
             } else {
-                return 0;
+                List<String> output=new ArrayList<>();
+                output.add("0");
+                output.add(header.get(i)+" does not have required values");
+                return output;
             }
        }
         try {
-            dataModel.setPrimaryKey(primaryKeyGenerator.generatePrimaryKey(
+            dataModel.setId(primaryKeyGenerator.generatePrimaryKey(
                     Arrays.asList(dataModel.getOrigination(), dataModel.getProjectName(), dataModel.getVariableId())));
             metaDataRepository.save(dataModel);
-            return 1;
+            List<String> output=new ArrayList<>();
+            output.add("1");
+            output.add("Row added successfully");
+            return output;
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("There is problem in creating primary key", e);
         }
@@ -101,7 +135,6 @@ public class ExcelHelper {
             return true;
         }
         for (String option : projectNameOptions) {
-            System.out.println(option + "  " + cell);
             if (option.equalsIgnoreCase(cell)) {
                 return true;
             }
@@ -123,8 +156,10 @@ public class ExcelHelper {
             row = sheet.createRow(rowIdx++);
             String[] attributes = {data.getProjectName(), data.getOrigination(), data.getScreenName(),
                     data.getFieldLabel(), data.getVariableId(), data.getDataType(),
-                    data.getDataDescription(), data.getMandatory(), data.getSource(),
-                    data.getAPI(), data.getOperation(), data.getCategory()};
+                    data.getDataDescription(), data.getCategory(), data.getMandatory(),
+                    data.getSource(), data.getAPI(), data.getOperation(),
+            data.getFI(),data.getPD(),data.getLegal(),data.getTechnical(),
+            data.getRCU(),data.getSetStage(),data.getUseStage()};
 
             for (String attribute : attributes) {
                 row.createCell(columnIdx++).setCellValue(attribute);

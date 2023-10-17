@@ -19,6 +19,20 @@ public class ColumnValueOptions {
     public  static List<String> APIOptions= Arrays.asList();
     public  static List<String> operationOptions= Arrays.asList();
     public  static List<String> categoryOptions= Arrays.asList();
+    public  static List<String> creditOptions= Arrays.asList();
+    public  static List<String> FIOptions= Arrays.asList();
+    public  static List<String> PDOptions= Arrays.asList();
+    public  static List<String> legalOptions= Arrays.asList();
+    public  static List<String> technicalOptions= Arrays.asList();
+    public  static List<String> RCUOptions= Arrays.asList();
+    public  static List<String> setStageOptions= Arrays.asList();
+    public  static List<String> useStageOptions= Arrays.asList();
 
-    public static List<List<String>> headerToHeaderOption= Arrays.asList(projectNameOptions,originationOptions,screenNameOptions,fieldLabelOptions,variableIdOptions,dataTypeOptions,descriptionOptions,mandatoryOptions,sourceOptions,APIOptions,operationOptions,categoryOptions);
+
+    public static List<List<String>> headerToHeaderOption= Arrays.asList(projectNameOptions,
+            originationOptions,screenNameOptions,fieldLabelOptions,
+            variableIdOptions,dataTypeOptions,descriptionOptions,
+            categoryOptions ,mandatoryOptions,sourceOptions,APIOptions,
+            creditOptions,operationOptions,FIOptions,PDOptions,legalOptions,
+            technicalOptions,RCUOptions,setStageOptions,useStageOptions);
 }

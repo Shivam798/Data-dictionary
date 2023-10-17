@@ -18,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:5174")
 @RestController
@@ -29,11 +30,11 @@ public class DataController {
     @Autowired
     private ExcelHelper excelHelper;
     @GetMapping("get/data")
-    public List<MetaDataModel> getData(){
-        return dataStorageService.getAlldata();
+    public ResponseEntity<Object>getData(){
+        return new ResponseEntity<>(dataStorageService.getAllData(),HttpStatus.OK);
     }
     @PostMapping(value = "upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> UploadDateSheet(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<Object> UploadDateSheet(@RequestParam("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             return new ResponseEntity<>("File is empty", HttpStatus.BAD_REQUEST);
         }
@@ -49,23 +50,25 @@ public class DataController {
             FileInputStream fileInputStream = new FileInputStream(tempFile);
 
             // Implement your logic to handle the file using the FileInputStream
+            Map<String,Object> result = dataStorageService.storeData(fileInputStream);
 
-            ResponseEntity result= dataStorageService.storeData(fileInputStream);
             // Clean up the temporary file if needed
             tempFile.delete();
-            return result;
+            return new ResponseEntity<>(result,HttpStatus.OK);
 
-        } catch (NoSuchAlgorithmException e) {
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalStateException e) {
             throw new RuntimeException(e);
         }
     }
-    @PutMapping("updateSingleEntity/")
-    public ResponseEntity<Object> updateSingleEntity(@RequestBody MetaDataModel updatedEntity){
-        return dataStorageService.updateSingleEntity(updatedEntity);
+    @PutMapping("updateSingleEntity/{id}")
+    public ResponseEntity<Object> updateSingleEntity(@PathVariable("id") String id,@RequestBody MetaDataModel updatedEntity){
+        return new ResponseEntity<>(dataStorageService.updateSingleEntity(id,updatedEntity),HttpStatus.OK);
     }
     @DeleteMapping("deleteEntity/{dataId}")
     public ResponseEntity<Object> deleteEntity(@PathVariable("dataId") String dataId){
-        return dataStorageService.deleteEntity(dataId);
+        return new ResponseEntity<>(dataStorageService.deleteEntity(dataId),HttpStatus.OK);
     }
 
     @GetMapping("/downloadExcel")

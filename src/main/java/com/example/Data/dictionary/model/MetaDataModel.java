@@ -12,17 +12,25 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "dataDictionary")
 @Data public class MetaDataModel {
     @Id
-    private String primaryKey;
-    private String projectName;
+    private String id;
     private String origination;
+    private String projectName;
     private String screenName;
     private String fieldLabel;
     private String variableId;
     private String dataType;
     private String dataDescription;
+    private String category;
     private String mandatory;
     private String source;
     private String API;
+    private String credit;
     private String operation;
-    private String category;
+    private String FI;
+    private String PD;
+    private String legal;
+    private String technical;
+    private String RCU;
+    private String setStage;
+    private String useStage;
 }
