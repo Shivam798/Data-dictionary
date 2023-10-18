@@ -1,24 +1,25 @@
 package com.example.Data.dictionary.service;
 
+import com.example.Data.dictionary.POJO.SingleColumnResponse;
+import com.example.Data.dictionary.constants.ColumnValueOptions;
+import com.example.Data.dictionary.constants.Header;
 import com.example.Data.dictionary.helper.ExcelHelper;
+import com.example.Data.dictionary.helper.FunctionalHelper;
 import com.example.Data.dictionary.helper.PrimaryKeyGenerator;
 import com.example.Data.dictionary.model.MetaDataModel;
 import com.example.Data.dictionary.repository.MetaDataRepository;
-import org.apache.commons.compress.utils.IOUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.concurrent.Phaser;
 
 @Service
 public class DataStorageService {
@@ -27,47 +28,74 @@ public class DataStorageService {
     private MetaDataRepository metaDataRepository;
     @Autowired
     private PrimaryKeyGenerator primaryKeyGenerator;
-
     @Autowired
     private ExcelHelper excelHelper;
+    @Autowired
+    FunctionalHelper functionalHelper;
+
     public List<MetaDataModel> getAllData() {
         return metaDataRepository.findAll();
     }
 
-    public Map<String,Object> storeData(FileInputStream dataFile) {
-
-        // Read the dataFile into a byte array
-        byte[] fileBytes = new byte[0];
-        try {
-            fileBytes = IOUtils.toByteArray(dataFile);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public List<SingleColumnResponse> getHeaderData() {
+        List<SingleColumnResponse> headerData=new ArrayList<>();
+        for (int i=0; i< ColumnValueOptions.headerToHeaderOption.size();i++){
+            SingleColumnResponse columnResponse=new SingleColumnResponse();
+            columnResponse.setField(Header.ColumnsForRow.get(i));
+            columnResponse.setEditable(true);
+            columnResponse.setHeaderName(Header.header.get(0));
+            columnResponse.setWidth(150);
+            if(!ColumnValueOptions.headerToHeaderOption.get(i).isEmpty()){
+                columnResponse.setType("singleSelect");
+                columnResponse.setValueOptions(ColumnValueOptions.headerToHeaderOption.get(i));
+            }else{
+                columnResponse.setType("string");
+                columnResponse.setValueOptions(null);
+            }
+            headerData.add(columnResponse);
         }
+        return headerData;
+    }
 
-        // Wrap the byte array in a ByteArrayInputStream
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(fileBytes);
-
-        XSSFWorkbook workbook= null;
+    public Map<String,Object> storeData(MultipartFile file) {
+        Map<String ,Object> outputMap=new HashMap<>();
+        if (file.isEmpty()) {
+            outputMap.put("message","File is empty");
+            return outputMap;
+        }
+        if (!excelHelper.checkExcelFormat(file)){
+            outputMap.put("message","File is not of excel type");
+            return outputMap;
+        }
+        XSSFWorkbook workbook = null;
         try {
-            workbook = new XSSFWorkbook(byteArrayInputStream);
+            workbook = new XSSFWorkbook(file.getInputStream());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         XSSFSheet sheet=workbook.getSheetAt(0);
+        if(!functionalHelper.incomingHeaderMatchesStoredHeader(sheet.getRow(0),Header.header)){
+            outputMap.put("message","Your header is not in defined form, please download template to define data");
+            return outputMap;
+        }
         Row row;
         List<Map<Integer,String>> rowsNotAdded=new ArrayList<>();
         for(int i=1; i<=sheet.getLastRowNum();i++){
             row=sheet.getRow(i);
-             List<String> status=excelHelper.ConvertRowToJSONObjectAndSave(row);
-            if(status.get(0)=="0"){
+            List<String> status=excelHelper.ConvertRowToJSONObjectAndSave(row);
+            if(Objects.equals(status.get(0), "0")){
                 Map<Integer,String> rowOutputStatus=new HashMap<>();
                 rowOutputStatus.put(i,status.get(1));
                 rowsNotAdded.add(rowOutputStatus);
             }
         }
-        Map<String ,Object> outputMap=new HashMap<>();
-        outputMap.put("msg","Data uploaded successfully");
-        outputMap.put("unUploaded rows",rowsNotAdded);
+        if(rowsNotAdded.size()>0){
+            outputMap.put("message","Partial Data uploaded ");
+            outputMap.put("unUploaded rows",rowsNotAdded);
+            return outputMap;
+        }
+        outputMap.put("message","Data uploaded successfully");
+        outputMap.put("unUploaded rows",null);
         return outputMap;
     }
 
@@ -83,17 +111,16 @@ public class DataStorageService {
             if(id.equals(newPrimaryKey)){
                 metaDataRepository.save(updatedEntity);
             }else{
-                MetaDataModel dataEntry=metaDataRepository.findMetaDataModelById(id);
-                metaDataRepository.delete(dataEntry);
+                metaDataRepository.deleteById(id);
                 updatedEntity.setId(newPrimaryKey);
                 metaDataRepository.save(updatedEntity);
             }
+            outputMap.put("msg","Successfully uploaded");
+            outputMap.put("data",updatedEntity);
+            return outputMap;
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        outputMap.put("msg","Successfully uploaded");
-        outputMap.put("data",updatedEntity);
-        return outputMap;
     }
 
     public Map<String,Object> deleteEntity(String dataId) {
@@ -106,7 +133,6 @@ public class DataStorageService {
         MetaDataModel dataEntry=metaDataRepository.findMetaDataModelById(dataId);
         outputMap.put("msg","successfully deleted");
         outputMap.put("data",dataEntry);
-        metaDataRepository.delete(dataEntry);
         return outputMap;
     }
 
@@ -115,6 +141,17 @@ public class DataStorageService {
         ByteArrayInputStream in= null;
         try {
             in = excelHelper.getExcelSheet(dataList);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return in;
+    }
+
+    public InputStream getTemplate() {
+        ByteArrayInputStream in= null;
+        List<MetaDataModel> dummyList=new ArrayList<>();
+        try {
+            in = excelHelper.getExcelSheet(dummyList);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

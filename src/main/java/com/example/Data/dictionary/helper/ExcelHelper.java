@@ -21,10 +21,9 @@ import java.util.*;
 
 @Component
 public class ExcelHelper {
-    public static final String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    public static final String EXCELTYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     private List<String> header = Header.header;
     private List<List<String>> headerToHeaderOption = ColumnValueOptions.headerToHeaderOption;
-
     static String SHEET = "DataDictionary";
     @Autowired
     PrimaryKeyGenerator primaryKeyGenerator;
@@ -33,7 +32,7 @@ public class ExcelHelper {
     MetaDataRepository metaDataRepository;
 
     public static boolean checkExcelFormat(MultipartFile file) {
-        if (!TYPE.equals(file.getContentType())) {
+        if (!EXCELTYPE.equals(file.getContentType())) {
             return false;
         }
         return true;
@@ -41,12 +40,12 @@ public class ExcelHelper {
 
     public List<String> ConvertRowToJSONObjectAndSave(Row row) {
         MetaDataModel dataModel = new MetaDataModel();
-       for (int i = 0; i < header.size(); i++) {
-           String cellValue = "";
-           Cell cell = row.getCell(i);
-           if (cell != null) {
-               cellValue = cell.getStringCellValue();
-           }
+        for (int i = 0; i < header.size(); i++) {
+            String cellValue = "";
+            Cell cell = row.getCell(i);
+            if (cell != null) {
+                cellValue = cell.getStringCellValue();
+            }
             if (ValueMatchesOptions(cellValue, headerToHeaderOption.get(i))) {
                 switch (i) {
                     case 0:
@@ -119,7 +118,8 @@ public class ExcelHelper {
        }
         try {
             dataModel.setId(primaryKeyGenerator.generatePrimaryKey(
-                    Arrays.asList(dataModel.getOrigination(), dataModel.getProjectName(), dataModel.getVariableId())));
+                    Arrays.asList(dataModel.getOrigination(),
+                            dataModel.getProjectName(), dataModel.getVariableId())));
             metaDataRepository.save(dataModel);
             List<String> output=new ArrayList<>();
             output.add("1");

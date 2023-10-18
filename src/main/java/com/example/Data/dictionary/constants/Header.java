@@ -9,4 +9,8 @@ public class Header {
             ,"Data Type","Description","category","Mandatory"
             ,"Source","API","Credit","Operation","FI","PD","Legal",
             "Technical","RCU","Set Stage","Use Stage");
+    public static List<String> ColumnsForRow= Arrays.asList("projectName","origination",
+            "screenName","fieldLabel","variableId","dataType","dataDescription",
+            "category","mandatory","source","API","credit","operation",
+            "FI","PD","legal","technical","RCU","setStage","useStage");
 }
